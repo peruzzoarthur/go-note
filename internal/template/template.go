@@ -54,13 +54,25 @@ func selectTemplate(templatesDir string) (string, error) {
 	}
 }
 
-func ReadTemplate(obsidianDir string) (string, error) {
-	templatesDir := filepath.Join(obsidianDir, "templates")
-	if !FileExists(templatesDir) {
-		return "", fmt.Errorf("templates directory not found at: %s", templatesDir)
+func ReadTemplate(templatesDir string) (string, error) {
+	// templatesDir := filepath.Join(obsidianDir, "templates")
+	// Expand any environment variables in the path
+	expandedPath := os.ExpandEnv(templatesDir)
+
+	// If path starts with ~, replace with home directory
+	if strings.HasPrefix(expandedPath, "~/") {
+		home, err := os.UserHomeDir()
+		if err != nil {
+			return "", fmt.Errorf("error getting home directory: %w", err)
+		}
+		expandedPath = filepath.Join(home, expandedPath[2:])
 	}
 
-	templatePath, err := selectTemplate(templatesDir)
+	if !FileExists(expandedPath) {
+		return "", fmt.Errorf("templates directory not found at: %s", expandedPath)
+	}
+
+	templatePath, err := selectTemplate(expandedPath)
 	if err != nil {
 		return "", err
 	}

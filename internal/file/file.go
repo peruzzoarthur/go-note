@@ -88,7 +88,13 @@ func CreateNote(directory string, filename string, meta metadata.Metadata) error
 	}
 	defer file.Close()
 
-	tmpl, err := template.ReadTemplate(os.Getenv("OBSIDIAN_NOTES"))
+	obsidianTemplates := os.Getenv("OBSIDIAN_TEMPLATES")
+	if obsidianTemplates == "" {
+		fmt.Println("OBSIDIAN_TEMPLATES environment variable not set")
+		os.Exit(1)
+	}
+
+	tmpl, err := template.ReadTemplate(obsidianTemplates)
 	if err != nil {
 		return fmt.Errorf("error getting template %w", err)
 	}

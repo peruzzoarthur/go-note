@@ -10,9 +10,9 @@ import (
 )
 
 func main() {
-	zetDir := os.Getenv("OBSIDIAN_NOTES")
-	if zetDir == "" {
-		fmt.Println("OBSIDIAN_NOTES environment variable not set")
+	obsidianDir := os.Getenv("OBSIDIAN_VAULT")
+	if obsidianDir == "" {
+		fmt.Println("OBSIDIAN_VAULT environment variable not set")
 		os.Exit(1)
 	}
 
@@ -29,13 +29,13 @@ func main() {
 		filename, meta = metadata.ParseArgs(args)
 		if filename == "" {
 			fmt.Println("Error: Filename is required")
-			fmt.Println("Usage: zet <filename> [-t|--tags 'tag1,tag2'] [-a|--aliases 'alias1,alias2']")
-			fmt.Println("Example: zet my-new-note -t 'golang,notes' -a 'go notes,notes'")
+			fmt.Println("Usage: note <filename> [-t|--tags 'tag1,tag2'] [-a|--aliases 'alias1,alias2']")
+			fmt.Println("Example: note my-new-note -t 'golang,notes' -a 'go notes,notes'")
 			os.Exit(1)
 		}
 	}
 
-	selectedDir, err := file.SelectDir(zetDir)
+	selectedDir, err := file.SelectDir(obsidianDir)
 	if err != nil {
 		fmt.Printf("Error: %v\n", err)
 		os.Exit(1)
