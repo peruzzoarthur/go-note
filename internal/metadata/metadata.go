@@ -20,7 +20,7 @@ func FormatMetadata(content string, metadata Metadata) string {
 		"{{date:YYYY-MM-DD}}": now.Format("2006-01-02"),
 		"{{title}}":           metadata.Title,
 		"{{tags}}":            strings.Join(metadata.Tags, ", "),
-		"{{alias}}":          strings.Join(metadata.Aliases, ", "),
+		"{{alias}}":           strings.Join(metadata.Aliases, ", "),
 	}
 
 	for placeholder, value := range replacements {
