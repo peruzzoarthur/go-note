@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"os"
 	"strings"
@@ -9,7 +10,50 @@ import (
 	"github.com/peruzzoarthur/go-note/internal/metadata"
 )
 
+func printHelp() {
+	helpText := `
+Go-Note - A command-line note-taking tool integrated with Obsidian
+
+Usage:
+  note [options] <filename>
+
+Environment Variables Required:
+  OBSIDIAN_VAULT       Path to your Obsidian vault directory
+  OBSIDIAN_TEMPLATES   Path to your Obsidian templates directory
+  
+Options:
+  -h, -help            Show this help message
+  -t, --tags           Add tags to the note (comma-separated)
+  -a, --aliases        Add aliases to the note (comma-separated)
+  
+Description:
+  Go-Note helps you create and manage notes in your Obsidian vault.
+  It allows you to:
+  - Select a directory for your note
+  - Choose a template from your Obsidian templates
+  - Create a new note with proper metadata
+  - Automatically open the note in Neovim with ZenMode
+
+Examples:
+  go-note my-new-note
+  go-note my-new-note -t "golang,notes" -a "go notes,programming"
+
+Note:
+  Make sure your environment variables are properly set before running.
+`
+	fmt.Println(helpText)
+	os.Exit(0)
+}
 func main() {
+
+	help := flag.Bool("help", false, "Show help message")
+	h := flag.Bool("h", false, "Show help message")
+	flag.Parse()
+
+	if *help || *h {
+		printHelp()
+	}
+
 	obsidianDir := os.Getenv("OBSIDIAN_VAULT")
 	if obsidianDir == "" {
 		fmt.Println("OBSIDIAN_VAULT environment variable not set")
