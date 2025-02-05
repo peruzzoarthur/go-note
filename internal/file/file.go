@@ -27,8 +27,8 @@ func GetFilename() string {
 	}
 }
 
-func SelectDir(zetDir string) (string, error) {
-	entries, err := os.ReadDir(zetDir)
+func SelectDir(obsidianDir string) (string, error) {
+	entries, err := os.ReadDir(obsidianDir)
 	if err != nil {
 		return "", fmt.Errorf("error reading directory: %w", err)
 	}
@@ -44,7 +44,7 @@ func SelectDir(zetDir string) (string, error) {
 	}
 
 	if len(dirs) == 0 {
-		return "", fmt.Errorf("no directories found in %s", zetDir)
+		return "", fmt.Errorf("no directories found in %s", obsidianDir)
 	}
 
 	fmt.Println("\nAvailable directories:")
@@ -67,7 +67,7 @@ func SelectDir(zetDir string) (string, error) {
 			continue
 		}
 
-		return filepath.Join(zetDir, dirs[selection-1]), nil
+		return filepath.Join(obsidianDir, dirs[selection-1]), nil
 	}
 }
 
@@ -82,19 +82,21 @@ func CreateNote(directory string, filename string, meta metadata.Metadata) error
 		return fmt.Errorf("file already exists: %s", fullPath)
 	}
 
+	// Create the file
 	file, err := os.Create(fullPath)
+
 	if err != nil {
 		return fmt.Errorf("error creating file: %w", err)
 	}
 	defer file.Close()
 
-	obsidianTemplates := os.Getenv("OBSIDIAN_TEMPLATES")
-	if obsidianTemplates == "" {
+	obsidianTemplatesDir := os.Getenv("OBSIDIAN_TEMPLATES")
+	if obsidianTemplatesDir == "" {
 		fmt.Println("OBSIDIAN_TEMPLATES environment variable not set")
 		os.Exit(1)
 	}
 
-	tmpl, err := template.ReadTemplate(obsidianTemplates)
+	tmpl, err := template.ReadTemplate(obsidianTemplatesDir)
 	if err != nil {
 		return fmt.Errorf("error getting template %w", err)
 	}
