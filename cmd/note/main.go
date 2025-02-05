@@ -46,10 +46,23 @@ Note:
 }
 func main() {
 
+	var (
+		name    string
+		tags    string
+		aliases string
+	)
+
+	// Define all flags
+	flag.StringVar(&name, "name", "", "Name of the note")
+	flag.StringVar(&name, "n", "", "Name of the note (shorthand)")
+	flag.StringVar(&tags, "tags", "", "Tags for the note (comma-separated)")
+	flag.StringVar(&tags, "t", "", "Tags for the note (shorthand)")
+	flag.StringVar(&aliases, "aliases", "", "Aliases for the note (comma-separated)")
+	flag.StringVar(&aliases, "a", "", "Aliases for the note (shorthand)")
 	help := flag.Bool("help", false, "Show help message")
 	h := flag.Bool("h", false, "Show help message")
-	flag.Parse()
 
+	flag.Parse()
 	if *help || *h {
 		printHelp()
 	}
@@ -60,22 +73,44 @@ func main() {
 		os.Exit(1)
 	}
 
-	args := os.Args[1:]
 	var filename string
 	var meta metadata.Metadata
 
-	if len(args) == 0 {
-		filename = file.GetFilename()
+	// Handle filename from flags or interactive input
+	if name != "" || flag.NArg() > 0 {
+		// Use filename from flags or first argument
+		if name != "" {
+			filename = name
+		} else {
+			filename = flag.Arg(0)
+		}
 		meta = metadata.Metadata{
-			Title: strings.ReplaceAll(filename, "-", " "),
+			Title:   strings.ReplaceAll(filename, "-", " "),
+			Tags:    make([]string, 0),
+			Aliases: make([]string, 0),
+		}
+
+		// Process tags and aliases
+		if tags != "" {
+			meta.Tags = strings.Split(tags, ",")
+			for i, tag := range meta.Tags {
+				meta.Tags[i] = strings.TrimSpace(tag)
+			}
+		}
+
+		if aliases != "" {
+			meta.Aliases = strings.Split(aliases, ",")
+			for i, alias := range meta.Aliases {
+				meta.Aliases[i] = strings.TrimSpace(alias)
+			}
 		}
 	} else {
-		filename, meta = metadata.ParseArgs(args)
-		if filename == "" {
-			fmt.Println("Error: Filename is required")
-			fmt.Println("Usage: note <filename> [-t|--tags 'tag1,tag2'] [-a|--aliases 'alias1,alias2']")
-			fmt.Println("Example: note my-new-note -t 'golang,notes' -a 'go notes,notes'")
-			os.Exit(1)
+		// If no filename provided via flags or args, get it interactively
+		filename = file.GetFilename()
+		meta = metadata.Metadata{
+			Title:   strings.ReplaceAll(filename, "-", " "),
+			Tags:    []string{"tag1", "tag2"},
+			Aliases: []string{"aliases1", "aliases2"},
 		}
 	}
 

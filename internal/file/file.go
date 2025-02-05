@@ -100,6 +100,7 @@ func CreateNote(directory string, filename string, meta metadata.Metadata) error
 	}
 
 	content := metadata.FormatMetadata(tmpl, meta)
+
 	if _, err := file.WriteString(content); err != nil {
 		return fmt.Errorf("error writing to file: %w", err)
 	}
