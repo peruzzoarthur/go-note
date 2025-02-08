@@ -35,14 +35,16 @@ func selectTemplate(templatesDir string) (string, error) {
 		fmt.Printf("%d: %s\n", i+1, tmpl)
 	}
 
-	reader := bufio.NewReader(os.Stdin)
+	scanner := bufio.NewScanner(os.Stdin)
 	for {
 		fmt.Print("\nSelect template number: ")
-		input, err := reader.ReadString('\n')
-		if err != nil {
-			return "", fmt.Errorf("error reading input: %w", err)
+
+		scanned := scanner.Scan()
+		if !scanned {
+			return "", fmt.Errorf("invalid input")
 		}
 
+		input := scanner.Text()
 		var selection int
 		_, err = fmt.Sscanf(strings.TrimSpace(input), "%d", &selection)
 		if err != nil || selection < 1 || selection > len(templates) {
@@ -55,7 +57,6 @@ func selectTemplate(templatesDir string) (string, error) {
 }
 
 func ReadTemplate(templatesDir string) (string, error) {
-	// templatesDir := filepath.Join(obsidianDir, "templates")
 	// Expand any environment variables in the path
 	expandedPath := os.ExpandEnv(templatesDir)
 

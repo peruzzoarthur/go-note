@@ -13,17 +13,22 @@ import (
 )
 
 func GetFilename() string {
-	reader := bufio.NewReader(os.Stdin)
+	scanner := bufio.NewScanner(os.Stdin)
 	for {
 		fmt.Print("Enter a filename: ")
-		filename, _ := reader.ReadString('\n')
-		trimmed := strings.TrimSpace(filename)
 
-		if len(trimmed) > 0 {
-			return trimmed
+		scanned := scanner.Scan()
+		if scanned {
+			text := scanner.Text()
+			if len(text) > 0 {
+				fmt.Print(text)
+				fmt.Print('\n')
+				fmt.Print(strings.TrimSpace(text))
+				return strings.TrimSpace(text)
+			}
 		}
 
-		fmt.Println("Error: The filename cannot be empty. Please insert a proper value.")
+		fmt.Println("Error: Filename is empty")
 	}
 }
 
@@ -52,26 +57,31 @@ func SelectDir(obsidianDir string) (string, error) {
 		fmt.Printf("%d: %s\n", i+1, dir)
 	}
 
-	reader := bufio.NewReader(os.Stdin)
+	scanner := bufio.NewScanner(os.Stdin)
 	for {
-		fmt.Print("\nSelect directory number: ")
-		input, err := reader.ReadString('\n')
-		if err != nil {
-			return "", fmt.Errorf("error reading input: %w", err)
+		fmt.Print("\nSelect dir number: ")
+
+		scanned := scanner.Scan()
+
+		if !scanned {
+			return "", fmt.Errorf("invalid input")
 		}
 
-		var selection int
-		_, err = fmt.Sscanf(strings.TrimSpace(input), "%d", &selection)
-		if err != nil || selection < 1 || selection > len(dirs) {
+		text := scanner.Text()
+
+		var selected int
+
+		_, err := fmt.Sscanf(strings.TrimSpace(text), "%d", &selected)
+
+		if err != nil || selected < 1 || selected > len(dirs) {
 			fmt.Printf("Please enter a number between 1 and %d\n", len(dirs))
 			continue
 		}
-
-		return filepath.Join(obsidianDir, dirs[selection-1]), nil
+		return filepath.Join(obsidianDir, dirs[selected-1]), nil
 	}
 }
 
-func CreateNote(directory string, filename string, meta metadata.Metadata) error {
+func CreateNote(directory string, filename string, meta metadata.Metadata, templatesPath string) error {
 	if len(filename) == 0 {
 		return fmt.Errorf("please insert a filename")
 	}
@@ -90,13 +100,7 @@ func CreateNote(directory string, filename string, meta metadata.Metadata) error
 	}
 	defer file.Close()
 
-	obsidianTemplatesDir := os.Getenv("OBSIDIAN_TEMPLATES")
-	if obsidianTemplatesDir == "" {
-		fmt.Println("OBSIDIAN_TEMPLATES environment variable not set")
-		os.Exit(1)
-	}
-
-	tmpl, err := template.ReadTemplate(obsidianTemplatesDir)
+	tmpl, err := template.ReadTemplate(templatesPath)
 	if err != nil {
 		return fmt.Errorf("error getting template %w", err)
 	}
