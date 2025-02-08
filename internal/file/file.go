@@ -4,7 +4,6 @@ import (
 	"bufio"
 	"fmt"
 	"os"
-	"os/exec"
 	"path/filepath"
 	"strings"
 
@@ -19,16 +18,11 @@ func GetFilename() string {
 
 		scanned := scanner.Scan()
 		if scanned {
-			text := scanner.Text()
+			text := strings.TrimSpace(scanner.Text())
 			if len(text) > 0 {
-				fmt.Print(text)
-				fmt.Print('\n')
-				fmt.Print(strings.TrimSpace(text))
-				return strings.TrimSpace(text)
+				return text
 			}
 		}
-
-		fmt.Println("Error: Filename is empty")
 	}
 }
 
@@ -81,39 +75,35 @@ func SelectDir(obsidianDir string) (string, error) {
 	}
 }
 
-func CreateNote(directory string, filename string, meta metadata.Metadata, templatesPath string) error {
+func CreateNote(directory string, filename string, meta metadata.Metadata, templatesPath string) (string, error) {
 	if len(filename) == 0 {
-		return fmt.Errorf("please insert a filename")
+		return "", fmt.Errorf("please insert a filename")
 	}
 
 	fullPath := filepath.Join(directory, filename+".md")
 
 	if template.FileExists(fullPath) {
-		return fmt.Errorf("file already exists: %s", fullPath)
+		return "", fmt.Errorf("file already exists: %s", fullPath)
 	}
 
 	// Create the file
 	file, err := os.Create(fullPath)
 
 	if err != nil {
-		return fmt.Errorf("error creating file: %w", err)
+		return "", fmt.Errorf("error creating file: %w", err)
 	}
 	defer file.Close()
 
 	tmpl, err := template.ReadTemplate(templatesPath)
 	if err != nil {
-		return fmt.Errorf("error getting template %w", err)
+		return "", fmt.Errorf("error getting template %w", err)
 	}
 
 	content := metadata.FormatMetadata(tmpl, meta)
 
 	if _, err := file.WriteString(content); err != nil {
-		return fmt.Errorf("error writing to file: %w", err)
+		return "", fmt.Errorf("error writing to file: %w", err)
 	}
 
-	cmd := exec.Command("nvim", "+ normal ggzzi", fullPath, "-c", ":ZenMode")
-	cmd.Stdin = os.Stdin
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
-	return cmd.Run()
+	return fullPath, nil
 }

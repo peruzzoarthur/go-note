@@ -4,6 +4,7 @@ import (
 	"flag"
 	"fmt"
 	"os"
+	"os/exec"
 	"strings"
 
 	"github.com/peruzzoarthur/go-note/internal/file"
@@ -22,8 +23,8 @@ Environment Variables Required:
   OBSIDIAN_TEMPLATES   Path to your Obsidian templates directory
   
 Options:
-  -h, -help            Show this help message
-	-n, --name           Add name to the note (string)
+  -h, -help            Show this help messaged
+  -n, --name           Add name to the note (string)
   -t, --tags           Add tags to the note (comma-separated)
   -a, --aliases        Add aliases to the note (comma-separated)
   
@@ -77,7 +78,6 @@ func main() {
 		os.Exit(1)
 	}
 
-
 	obsidianTemplatesDir := os.Getenv("OBSIDIAN_TEMPLATES")
 	if obsidianTemplatesDir == "" {
 		fmt.Println("OBSIDIAN_TEMPLATES environment variable not set")
@@ -85,8 +85,8 @@ func main() {
 	}
 	// Initialize metadata
 	meta := metadata.Metadata{
-		Tags:    []string{},
-		Aliases: []string{},
+		Tags:    []string{"tag1", "tag2", "tag3"},
+		Aliases: []string{"aliases1", "aliases2"},
 	}
 
 	filename := strings.TrimSpace(name)
@@ -98,10 +98,12 @@ func main() {
 	meta.Title = strings.ReplaceAll(filename, "-", " ")
 
 	if tags != "" {
+		meta.Tags = []string{}
 		meta.Tags = append(meta.Tags, strings.Split(tags, ",")...)
 	}
 
 	if aliases != "" {
+		meta.Aliases = []string{}
 		meta.Aliases = append(meta.Aliases, strings.Split(aliases, ",")...)
 	}
 
@@ -112,8 +114,17 @@ func main() {
 		os.Exit(1)
 	}
 
-	if err := file.CreateNote(selectedDir, filename, meta, obsidianTemplatesDir); err != nil {
+	createdFilePath, err := file.CreateNote(selectedDir, filename, meta, obsidianTemplatesDir)
+	if err != nil {
 		fmt.Printf("Error: %v\n", err)
 		os.Exit(1)
 	}
+	fmt.Printf("\nCreated note at %s\n", createdFilePath)
+
+	cmd := exec.Command("nvim", "+ normal ggzzi", createdFilePath, "-c", ":ZenMode")
+	cmd.Stdin = os.Stdin
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	fmt.Print("\nOpening note...\n")
+	cmd.Run()
 }
