@@ -11,6 +11,11 @@ import (
 	"github.com/peruzzoarthur/go-note/internal/template"
 )
 
+func fileExists(path string) bool {
+	_, err := os.Stat(path)
+	return !os.IsNotExist(err)
+}
+
 func GetFilename() string {
 	scanner := bufio.NewScanner(os.Stdin)
 	for {
@@ -76,31 +81,23 @@ func SelectDir(obsidianDir string) (string, error) {
 }
 
 func CreateNote(directory string, filename string, meta metadata.Metadata, templatesPath string) (string, error) {
-	if len(filename) == 0 {
-		return "", fmt.Errorf("please insert a filename")
-	}
-
 	fullPath := filepath.Join(directory, filename+".md")
-
-	if template.FileExists(fullPath) {
+	if fileExists(fullPath) {
 		return "", fmt.Errorf("file already exists: %s", fullPath)
 	}
 
-	// Create the file
 	file, err := os.Create(fullPath)
-
 	if err != nil {
 		return "", fmt.Errorf("error creating file: %w", err)
 	}
-	defer file.Close()
 
+	defer file.Close()
 	tmpl, err := template.ReadTemplate(templatesPath)
 	if err != nil {
 		return "", fmt.Errorf("error getting template %w", err)
 	}
 
 	content := metadata.FormatMetadata(tmpl, meta)
-
 	if _, err := file.WriteString(content); err != nil {
 		return "", fmt.Errorf("error writing to file: %w", err)
 	}

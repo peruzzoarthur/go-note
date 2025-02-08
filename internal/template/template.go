@@ -8,11 +8,6 @@ import (
 	"strings"
 )
 
-func FileExists(path string) bool {
-	_, err := os.Stat(path)
-	return !os.IsNotExist(err)
-}
-
 func selectTemplate(templatesDir string) (string, error) {
 	entries, err := os.ReadDir(templatesDir)
 	if err != nil {
@@ -57,23 +52,7 @@ func selectTemplate(templatesDir string) (string, error) {
 }
 
 func ReadTemplate(templatesDir string) (string, error) {
-	// Expand any environment variables in the path
-	expandedPath := os.ExpandEnv(templatesDir)
-
-	// If path starts with ~, replace with home directory
-	if strings.HasPrefix(expandedPath, "~/") {
-		home, err := os.UserHomeDir()
-		if err != nil {
-			return "", fmt.Errorf("error getting home directory: %w", err)
-		}
-		expandedPath = filepath.Join(home, expandedPath[2:])
-	}
-
-	if !FileExists(expandedPath) {
-		return "", fmt.Errorf("templates directory not found at: %s", expandedPath)
-	}
-
-	templatePath, err := selectTemplate(expandedPath)
+	templatePath, err := selectTemplate(templatesDir)
 	if err != nil {
 		return "", err
 	}
