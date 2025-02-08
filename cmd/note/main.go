@@ -71,32 +71,34 @@ func main() {
 		printHelp()
 	}
 
-	// Ensure OBSIDIAN_VAULT is set
+	// Ensure obsidian vault dir is set
 	obsidianDir := os.Getenv("OBSIDIAN_VAULT")
 	if obsidianDir == "" {
 		fmt.Println("OBSIDIAN_VAULT environment variable not set")
 		os.Exit(1)
 	}
 
+	// Ensure templates dir is set
 	obsidianTemplatesDir := os.Getenv("OBSIDIAN_TEMPLATES")
 	if obsidianTemplatesDir == "" {
 		fmt.Println("OBSIDIAN_TEMPLATES environment variable not set")
 		os.Exit(1)
 	}
-	// Initialize metadata
+
+	// Initialize metadata with generic values for tags and aliases
 	meta := metadata.Metadata{
 		Tags:    []string{"tag1", "tag2", "tag3"},
 		Aliases: []string{"aliases1", "aliases2"},
 	}
 
+	// Set filename based on tag -n or user prompt
 	filename := strings.TrimSpace(name)
-
 	if filename == "" {
 		filename = file.GetFilename()
 	}
-
 	meta.Title = strings.ReplaceAll(filename, "-", " ")
 
+	// Set tags and aliases if passed with flags -t AND/OR -a
 	if tags != "" {
 		meta.Tags = []string{}
 		meta.Tags = append(meta.Tags, strings.Split(tags, ",")...)
@@ -107,13 +109,14 @@ func main() {
 		meta.Aliases = append(meta.Aliases, strings.Split(aliases, ",")...)
 	}
 
-	// Select the directory and create the note
+	// Select the directory destination
 	selectedDir, err := file.SelectDir(obsidianDir)
 	if err != nil {
 		fmt.Printf("Error: %v\n", err)
 		os.Exit(1)
 	}
 
+	// Create the note
 	createdFilePath, err := file.CreateNote(selectedDir, filename, meta, obsidianTemplatesDir)
 	if err != nil {
 		fmt.Printf("Error: %v\n", err)
@@ -121,10 +124,11 @@ func main() {
 	}
 	fmt.Printf("\nCreated note at %s\n", createdFilePath)
 
+	// Exec neovim for editing the note
 	cmd := exec.Command("nvim", "+ normal ggzzi", createdFilePath, "-c", ":ZenMode")
 	cmd.Stdin = os.Stdin
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
-	fmt.Print("\nOpening note...\n")
+	fmt.Println("Opening note...")
 	cmd.Run()
 }
