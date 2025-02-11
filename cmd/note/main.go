@@ -48,6 +48,21 @@ Note:
 }
 
 func main() {
+	// Ensure obsidian vault dir is set
+	obsidianDir := os.Getenv("OBSIDIAN_VAULT")
+	if obsidianDir == "" {
+		fmt.Println("OBSIDIAN_VAULT environment variable not set")
+		os.Exit(1)
+	}
+
+	// Ensure templates dir is set
+	obsidianTemplatesDir := os.Getenv("OBSIDIAN_TEMPLATES")
+	if obsidianTemplatesDir == "" {
+		fmt.Println("OBSIDIAN_TEMPLATES environment variable not set")
+		os.Exit(1)
+	}
+
+	// Declare file-related variables
 	var (
 		name    string
 		tags    string
@@ -71,19 +86,6 @@ func main() {
 		printHelp()
 	}
 
-	// Ensure obsidian vault dir is set
-	obsidianDir := os.Getenv("OBSIDIAN_VAULT")
-	if obsidianDir == "" {
-		fmt.Println("OBSIDIAN_VAULT environment variable not set")
-		os.Exit(1)
-	}
-
-	// Ensure templates dir is set
-	obsidianTemplatesDir := os.Getenv("OBSIDIAN_TEMPLATES")
-	if obsidianTemplatesDir == "" {
-		fmt.Println("OBSIDIAN_TEMPLATES environment variable not set")
-		os.Exit(1)
-	}
 
 	// Initialize metadata with generic values for tags and aliases
 	meta := metadata.Metadata{
