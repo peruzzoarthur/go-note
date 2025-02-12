@@ -64,24 +64,24 @@ Go-note is a helper module for creating Obsidian notes with pre-defined template
 
 ### User Experience
 
-• Simple command-line interface
-• Interactive when needed
-• Streamlined workflow from creation to editing
-• Flexible configuration through environment variables
+- Simple command-line interface
+- Interactive when needed
+- Streamlined workflow from creation to editing
+- Flexible configuration through environment variables
 
 ### Benefits
 
-• Fast note creation
-• Consistent note structure
-• Integration with existing tools (Obsidian, Neovim)
-• Customizable to personal workflow
+- Fast note creation
+- Consistent note structure
+- Integration with existing tools (Obsidian, Neovim)
+- Customizable to personal workflow
 
 ### Technical Requirements
 
-• Go 1.21
-• Neovim
-• Obsidian
-• Proper environment configuration
+- Go 1.21
+- Neovim
+- Obsidian
+- Proper environment configuration
 
 # Install and run
 
